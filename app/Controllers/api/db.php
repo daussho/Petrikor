@@ -24,4 +24,17 @@ class DB extends BaseController
             'data' => $success
         ]);
     }
+
+    public function insertMany($documentName)
+    {
+        $model = new BaseModel($documentName);
+        $store = $model->getStore();
+
+        $data = json_decode($this->request->getBody(), true);
+
+        $success = $store->insertMany($data);
+        return $this->response->setJSON([
+            'data' => $success
+        ]);
+    }
 }
