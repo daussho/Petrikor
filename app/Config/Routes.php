@@ -34,6 +34,12 @@ $routes->setAutoRoute(true);
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
 
+$routes->group('db', function($routes)
+{
+    $routes->add('insert/(:alphanum)', 'Api\DB::insert/$1');
+    $routes->add('insert-many/(:alphanum)', 'Api\DB::insertMany/$1');
+});
+
 /*
  * --------------------------------------------------------------------
  * Additional Routing
