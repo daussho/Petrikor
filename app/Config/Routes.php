@@ -36,7 +36,7 @@ $routes->get('/', 'Home::index');
 $routes->group('db', function ($routes) {
     $routes->post('insert/(:alphanum)', 'Api\DB::insert/$1');
     $routes->post('insert-many/(:alphanum)', 'Api\DB::insertMany/$1');
-    $routes->get('find-by/(:alphanum)', 'Api\DB::findBy/$1');
+    $routes->post('find-by/(:alphanum)', 'Api\DB::findBy/$1');
     $routes->patch('update-by-id/(:alphanum)', 'Api\DB::updateById/$1');
 });
 

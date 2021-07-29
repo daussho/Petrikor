@@ -4,13 +4,14 @@ namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
 use App\Models\BaseModel;
+use DateTime;
 use phpDocumentor\Reflection\Types\Null_;
 
 class DB extends BaseController
 {
     public function index()
     {
-        return view('welcome_message');
+        return ('hello world');
     }
 
     public function insert($documentName)
@@ -19,6 +20,9 @@ class DB extends BaseController
         $store = $model->getStore();
 
         $data = json_decode($this->request->getBody(), true);
+        $data['_created_at'] = date(DateTime::ISO8601);
+        $data['_updated_at'] = date(DateTime::ISO8601);
+        $data['_deleted_at'] = NULL;
 
         $success = $store->insert($data);
         return $this->response->setJSON([
@@ -33,6 +37,12 @@ class DB extends BaseController
 
         $data = json_decode($this->request->getBody(), true);
 
+        foreach ($data as $key => $value) {
+            $data[$key]['_created_at'] = date(DateTime::ISO8601);
+            $data[$key]['_updated_at'] = date(DateTime::ISO8601);
+            $data[$key]['_deleted_at'] = NULL;
+        }
+
         $success = $store->insertMany($data);
         return $this->response->setJSON([
             'data' => $success
@@ -45,9 +55,12 @@ class DB extends BaseController
         $store = $model->getStore();
 
         $body = json_decode($this->request->getBody(), true);
+        $body['criteria'][] = [
+            '_deleted_at', '=', NULL
+        ];
 
         $param = [
-            'criteria' => $body['criteria'] ?? [],
+            'criteria' => $body['criteria'],
             'order' => $body['order'] ?? NULL,
             'limit' => $body['limit'] ?? NULL,
             'offset' => $body['offset'] ?? NULL,
@@ -69,6 +82,8 @@ class DB extends BaseController
         $store = $model->getStore();
 
         $body = json_decode($this->request->getBody(), true);
+
+        $body['data']['_updated_at'] = date(DateTime::ISO8601);
 
         $data = $store->updateById($body['id'], $body['data']);
 
