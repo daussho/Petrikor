@@ -38,6 +38,7 @@ $routes->group('db', function($routes)
 {
     $routes->add('insert/(:alphanum)', 'Api\DB::insert/$1');
     $routes->add('insert-many/(:alphanum)', 'Api\DB::insertMany/$1');
+    $routes->add('find-by/(:alphanum)', 'Api\DB::findBy/$1');
 });
 
 /*
