@@ -62,4 +62,18 @@ class DB extends BaseController
             ],
         ]);
     }
+
+    public function updateById($documentName)
+    {
+        $model = new BaseModel($documentName);
+        $store = $model->getStore();
+
+        $body = json_decode($this->request->getBody(), true);
+
+        $data = $store->updateById($body['id'], $body['data']);
+
+        return $this->response->setJSON([
+            'data' => $data,
+        ]);
+    }
 }

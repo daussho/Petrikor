@@ -7,9 +7,8 @@ $routes = Services::routes();
 
 // Load the system's routing file first, so that the app and ENVIRONMENT
 // can override as needed.
-if (file_exists(SYSTEMPATH . 'Config/Routes.php'))
-{
-	require SYSTEMPATH . 'Config/Routes.php';
+if (file_exists(SYSTEMPATH . 'Config/Routes.php')) {
+    require SYSTEMPATH . 'Config/Routes.php';
 }
 
 /**
@@ -34,11 +33,11 @@ $routes->setAutoRoute(true);
 // route since we don't have to scan directories.
 $routes->get('/', 'Home::index');
 
-$routes->group('db', function($routes)
-{
-    $routes->add('insert/(:alphanum)', 'Api\DB::insert/$1');
-    $routes->add('insert-many/(:alphanum)', 'Api\DB::insertMany/$1');
-    $routes->add('find-by/(:alphanum)', 'Api\DB::findBy/$1');
+$routes->group('db', function ($routes) {
+    $routes->post('insert/(:alphanum)', 'Api\DB::insert/$1');
+    $routes->post('insert-many/(:alphanum)', 'Api\DB::insertMany/$1');
+    $routes->get('find-by/(:alphanum)', 'Api\DB::findBy/$1');
+    $routes->patch('update-by-id/(:alphanum)', 'Api\DB::updateById/$1');
 });
 
 /*
@@ -54,7 +53,6 @@ $routes->group('db', function($routes)
  * You will have access to the $routes object within that file without
  * needing to reload it.
  */
-if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
-{
-	require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
+if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php')) {
+    require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }
