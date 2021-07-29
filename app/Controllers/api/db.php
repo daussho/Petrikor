@@ -62,7 +62,7 @@ class DB extends BaseController
         $param = [
             'criteria' => $body['criteria'],
             'order' => $body['order'] ?? NULL,
-            'limit' => $body['limit'] ?? NULL,
+            'limit' => $body['limit'] ?? 25,
             'offset' => $body['offset'] ?? NULL,
         ];
 
