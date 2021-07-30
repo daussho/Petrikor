@@ -78,6 +78,7 @@ class DB extends BaseController
 
         return $this->response->setJSON([
             'data' => $data,
+            'pagination' => $this->getPagination($documentName, $param),
             'debug' => [
                 'param' => $param
             ],
@@ -98,5 +99,20 @@ class DB extends BaseController
         return $this->response->setJSON([
             'data' => $data,
         ]);
+    }
+
+    private function getPagination($documentName, $param)
+    {
+        $model = new BaseModel($documentName);
+        $store = $model->getStore();
+
+        $data = $store->findBy($param['criteria'], $param['order']);
+
+        return [
+            'page' => $param['page'],
+            'per_page' => $param['limit'],
+            'total_data' => count($data),
+            'total_page' => ceil(count($data) / $param['limit']),
+        ];
     }
 }
