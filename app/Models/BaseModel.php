@@ -11,7 +11,7 @@ class BaseModel
 
     function __construct(string $documentName)
     {
-        $this->dbDir = __DIR__ . "../../_db";
+        $this->dbDir = __DIR__ . "../../../_db";
         $this->store = new Store($documentName, $this->dbDir);
     }
 
