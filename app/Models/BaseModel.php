@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use SleekDB\Query;
 use SleekDB\Store;
 
 class BaseModel
@@ -11,8 +12,12 @@ class BaseModel
 
     function __construct(string $documentName)
     {
+        $configuration = [
+            "timeout" => false, // deprecated! Set it to false!
+        ];
+
         $this->dbDir = __DIR__ . "../../../_db";
-        $this->store = new Store($documentName, $this->dbDir);
+        $this->store = new Store($documentName, $this->dbDir, $configuration);
     }
 
     public function getStore()
