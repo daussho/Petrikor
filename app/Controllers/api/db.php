@@ -3,6 +3,7 @@
 namespace App\Controllers\Api;
 
 use App\Controllers\BaseController;
+use App\Helpers\GlobalHelper;
 use App\Models\BaseModel;
 use DateTime;
 use phpDocumentor\Reflection\Types\Null_;
@@ -20,9 +21,11 @@ class DB extends BaseController
         $store = $model->getStore();
 
         $data = json_decode($this->request->getBody(), true);
-        $data['_created_at'] = date(DateTime::ISO8601);
-        $data['_updated_at'] = date(DateTime::ISO8601);
-        $data['_deleted_at'] = NULL;
+        $data['_meta'] = [
+            'created_at' => date(DateTime::ISO8601),
+            'updated_at' => date(DateTime::ISO8601),
+            'deleted_at' => NULL,
+        ];
 
         $success = $store->insert($data);
         return $this->response->setJSON([
@@ -38,9 +41,11 @@ class DB extends BaseController
         $data = json_decode($this->request->getBody(), true);
 
         foreach ($data as $key => $value) {
-            $data[$key]['_created_at'] = date(DateTime::ISO8601);
-            $data[$key]['_updated_at'] = date(DateTime::ISO8601);
-            $data[$key]['_deleted_at'] = NULL;
+            $data[$key]['_meta'] = [
+                'created_at' => date(DateTime::ISO8601),
+                'updated_at' => date(DateTime::ISO8601),
+                'deleted_at' => NULL,
+            ];
         }
 
         $success = $store->insertMany($data);
@@ -55,16 +60,19 @@ class DB extends BaseController
         $store = $model->getStore();
 
         $body = json_decode($this->request->getBody(), true);
+        $query = $this->request->getGet();
+
         $body['criteria'][] = [
-            '_deleted_at', '=', NULL
+            '_meta.deleted_at', '=', NULL
         ];
 
         $param = [
             'criteria' => $body['criteria'],
-            'order' => $body['order'] ?? NULL,
-            'limit' => $body['limit'] ?? 25,
-            'offset' => $body['offset'] ?? NULL,
+            'order' => $body['order'] ?? ['_id' => 'asc'],
+            'limit' => $query['limit'] ?? 25,
+            'page' => $query['page'] ?? 1,
         ];
+        $param['offset'] = ($param['page'] - 1) * $param['limit'];
 
         $data = $store->findBy($param['criteria'], $param['order'], $param['limit'], $param['offset']);
 
@@ -83,7 +91,7 @@ class DB extends BaseController
 
         $body = json_decode($this->request->getBody(), true);
 
-        $body['data']['_updated_at'] = date(DateTime::ISO8601);
+        $body['data']['_meta']['updated_at'] = date(DateTime::ISO8601);
 
         $data = $store->updateById($body['id'], $body['data']);
 
