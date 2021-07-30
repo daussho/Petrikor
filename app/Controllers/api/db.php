@@ -101,6 +101,24 @@ class DB extends BaseController
         ]);
     }
 
+    public function delete($documentName, $id)
+    {
+        $model = new BaseModel($documentName);
+        $store = $model->getStore();
+
+        $data = $store->findById($id);
+        $data['_meta']['updated_at'] = date(DateTime::ISO8601);
+        $data['_meta']['deleted_at'] = date(DateTime::ISO8601);
+
+        $res = $store->updateById($id, [
+            '_meta' => $data['_meta'],
+        ]);
+
+        return $this->response->setJSON([
+            'data' => $res,
+        ]);
+    }
+
     private function getPagination($documentName, $param)
     {
         $model = new BaseModel($documentName);

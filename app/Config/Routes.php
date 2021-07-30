@@ -38,6 +38,7 @@ $routes->group('db', function ($routes) {
     $routes->post('insert-many/(:alphanum)', 'Api\DB::insertMany/$1');
     $routes->post('find-by/(:alphanum)', 'Api\DB::findBy/$1');
     $routes->patch('update-by-id/(:alphanum)', 'Api\DB::updateById/$1');
+    $routes->delete('delete/(:alphanum)/(:num)', 'Api\DB::delete/$1/$2');
 });
 
 /*
