@@ -6,7 +6,6 @@ use App\Controllers\BaseController;
 use App\Helpers\GlobalHelper;
 use App\Models\BaseModel;
 use DateTime;
-use phpDocumentor\Reflection\Types\Null_;
 
 class DB extends BaseController
 {
