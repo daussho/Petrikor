@@ -109,8 +109,8 @@ class DB extends BaseController
         $data = $store->findBy($param['criteria'], $param['order']);
 
         return [
-            'page' => $param['page'],
-            'per_page' => $param['limit'],
+            'page' => (int) $param['page'],
+            'per_page' => (int) $param['limit'],
             'total_data' => count($data),
             'total_page' => ceil(count($data) / $param['limit']),
         ];
