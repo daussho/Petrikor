@@ -7,7 +7,7 @@ use App\Helpers\GlobalHelper;
 use App\Models\BaseModel;
 use DateTime;
 
-class DB extends BaseController
+class DBController extends BaseController
 {
     public function index()
     {
