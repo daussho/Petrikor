@@ -34,7 +34,8 @@ class DB extends BaseController
             if (!empty($found)) {
                 $this->response->setStatusCode(400);
                 return $this->response->setJSON([
-                    'data' => false
+                    'message' => "Duplicate data, key: {$query['unique']}, value: {$data[$query['unique']]}",
+                    'data' => false,
                 ]);
             }
         }
