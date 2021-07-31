@@ -5,10 +5,25 @@ namespace App\Controllers\Api;
 use App\Controllers\BaseController;
 use App\Helpers\GlobalHelper;
 use App\Models\BaseModel;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
 use DateTime;
+use Psr\Log\LoggerInterface;
+use SleekDB\Store;
 
 class DBController extends BaseController
 {
+    private $query;
+    private $body;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    {
+        parent::initController($request, $response, $logger);
+
+        $this->query = $this->request->getGet();
+        $this->body = $this->request->getJSON(true);
+    }
+
     public function index()
     {
         return ('hello world');
@@ -52,36 +67,50 @@ class DBController extends BaseController
         $store = $model->getStore();
 
         $data = json_decode($this->request->getBody(), true);
-        $query = $this->request->getGet();
 
-        $newData = [];
+        if (!empty($this->query['unique'])) {
+            $success = $this->_insertManyUnique($store, $this->query['unique']);
 
-        foreach ($data as $key => $value) {
-            if (!empty($query['unique'])) {
-                $found = $store->findOneBy([$query['unique'], '=', $value[$query['unique']]]);
-
-                if (empty($found)) {
-                    $value['_meta'] = [
-                        'created_at' => date(DateTime::ISO8601),
-                        'updated_at' => date(DateTime::ISO8601),
-                        'deleted_at' => NULL,
-                    ];
-
-                    $newData[] = $value;
-                }
-            }
-        }
-
-        if (empty($newData)) {
             return $this->response->setJSON([
-                'data' => false
+                'data' => $success,
+                'legnth' => count($success),
             ]);
         }
 
-        $success = $store->insertMany($newData);
+        foreach ($data as $key => $value) {
+            $data[$key]['_meta'] = [
+                'created_at' => date(DateTime::ISO8601),
+                'updated_at' => date(DateTime::ISO8601),
+                'deleted_at' => NULL,
+            ];
+        }
+
+        $success = $store->insertMany($data);
         return $this->response->setJSON([
-            'data' => $success
+            'data' => $success,
+            'legnth' => count($success),
         ]);
+    }
+
+    private function _insertManyUnique(Store $store, string $unique)
+    {
+        $respose = [];
+
+        foreach ($this->body as $key => $value) {
+            $found = $store->findOneBy([$unique, '=', $value[$unique]]);
+
+            if (empty($found)) {
+                $value['_meta'] = [
+                    'created_at' => date(DateTime::ISO8601),
+                    'updated_at' => date(DateTime::ISO8601),
+                    'deleted_at' => NULL,
+                ];
+
+                $respose[] = $store->insert($value);
+            }
+        }
+
+        return $respose;
     }
 
     public function findBy($documentName)
