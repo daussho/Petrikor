@@ -16,7 +16,7 @@ class BaseModel
             "timeout" => false, // deprecated! Set it to false!
         ];
 
-        $this->dbDir = __DIR__ . "../../../_db";
+        $this->dbDir = __DIR__ . "/../../_db";
         $this->store = new Store($documentName, $this->dbDir, $configuration);
     }
 
