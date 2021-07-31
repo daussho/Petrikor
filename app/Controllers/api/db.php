@@ -82,7 +82,7 @@ class DB extends BaseController
         $param = [
             'criteria' => $body['criteria'],
             'order' => $body['order'] ?? ['_id' => 'asc'],
-            'limit' => $query['limit'] ?? 25,
+            'limit' => !empty($query['limit']) ? ($query['limit'] > 0 ? $query['limit'] : NULL) : 25,
             'page' => $query['page'] ?? 1,
         ];
         $param['offset'] = ($param['page'] - 1) * $param['limit'];
@@ -134,6 +134,10 @@ class DB extends BaseController
 
     private function getPagination($documentName, $param)
     {
+        if ($param['limit'] < 1) {
+            return [];
+        }
+
         $model = new BaseModel($documentName);
         $store = $model->getStore();
 
