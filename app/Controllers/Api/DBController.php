@@ -52,16 +52,33 @@ class DBController extends BaseController
         $store = $model->getStore();
 
         $data = json_decode($this->request->getBody(), true);
+        $query = $this->request->getGet();
+
+        $newData = [];
 
         foreach ($data as $key => $value) {
-            $data[$key]['_meta'] = [
-                'created_at' => date(DateTime::ISO8601),
-                'updated_at' => date(DateTime::ISO8601),
-                'deleted_at' => NULL,
-            ];
+            if (!empty($query['unique'])) {
+                $found = $store->findOneBy([$query['unique'], '=', $value[$query['unique']]]);
+
+                if (empty($found)) {
+                    $value['_meta'] = [
+                        'created_at' => date(DateTime::ISO8601),
+                        'updated_at' => date(DateTime::ISO8601),
+                        'deleted_at' => NULL,
+                    ];
+
+                    $newData[] = $value;
+                }
+            }
         }
 
-        $success = $store->insertMany($data);
+        if (empty($newData)) {
+            return $this->response->setJSON([
+                'data' => false
+            ]);
+        }
+
+        $success = $store->insertMany($newData);
         return $this->response->setJSON([
             'data' => $success
         ]);
