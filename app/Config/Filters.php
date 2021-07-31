@@ -2,6 +2,8 @@
 
 namespace Config;
 
+use App\Filters\AuthFilter;
+use App\Filters\CorsFilter;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\DebugToolbar;
@@ -16,9 +18,11 @@ class Filters extends BaseConfig
 	 * @var array
 	 */
 	public $aliases = [
-		'csrf'     => CSRF::class,
-		'toolbar'  => DebugToolbar::class,
-		'honeypot' => Honeypot::class,
+		'csrf'     	=> CSRF::class,
+		'toolbar'  	=> DebugToolbar::class,
+		'honeypot' 	=> Honeypot::class,
+		'auth' 		=> AuthFilter::class,
+		'cors'		=> CorsFilter::class,
 	];
 
 	/**
@@ -34,6 +38,7 @@ class Filters extends BaseConfig
 		],
 		'after'  => [
 			'toolbar',
+			'cors',
 			// 'honeypot',
 		],
 	];
@@ -58,5 +63,7 @@ class Filters extends BaseConfig
 	 *
 	 * @var array
 	 */
-	public $filters = [];
+	public $filters = [
+		'auth' => ['before' => ['db/*']],
+	];
 }
