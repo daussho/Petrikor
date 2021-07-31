@@ -29,7 +29,7 @@ class DB extends BaseController
         ];
 
         if (!empty($query['unique'])) {
-            $found = $store->findBy([$query['unique'], '=', $data[$query['unique']]]);
+            $found = $store->findOneBy([$query['unique'], '=', $data[$query['unique']]]);
 
             if (!empty($found)) {
                 $this->response->setStatusCode(400);
