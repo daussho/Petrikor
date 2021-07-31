@@ -32,7 +32,8 @@
 		}
 	},
 	"scripts": {
-		"test": "phpunit"
+		"test": "phpunit",
+		"dev": "php -S 0.0.0.0:8080 public\\index.php"
 	},
 	"support": {
 		"forum": "http://forum.codeigniter.com/",
