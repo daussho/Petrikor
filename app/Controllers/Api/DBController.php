@@ -32,30 +32,17 @@ class DBController extends BaseController
     public function insert($documentName)
     {
         $model = new BaseModel($documentName);
-        $store = $model->getStore();
 
-        $query = $this->request->getGet();
-        $data = json_decode($this->request->getBody(), true);
+        $success = $model->insert($this->body, $this->query['unique'] ?? '');
 
-        $data['_meta'] = [
-            'created_at' => date(DateTime::ISO8601),
-            'updated_at' => date(DateTime::ISO8601),
-            'deleted_at' => NULL,
-        ];
-
-        if (!empty($query['unique'])) {
-            $found = $store->findOneBy([$query['unique'], '=', $data[$query['unique']]]);
-
-            if (!empty($found)) {
-                $this->response->setStatusCode(400);
-                return $this->response->setJSON([
-                    'message' => "Duplicate data, key: {$query['unique']}, value: {$data[$query['unique']]}",
-                    'data' => false,
-                ]);
-            }
+        if (!$success) {
+            $this->response->setStatusCode(400);
+            return $this->response->setJSON([
+                'message' => "Duplicate data, key: {$this->query['unique']}, value: {$this->body[$this->query['unique']]}",
+                'data' => false,
+            ]);
         }
 
-        $success = $store->insert($data);
         return $this->response->setJSON([
             'data' => $success
         ]);
