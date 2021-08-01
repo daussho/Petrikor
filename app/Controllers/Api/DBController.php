@@ -5,92 +5,85 @@ namespace App\Controllers\Api;
 use App\Controllers\BaseController;
 use App\Helpers\GlobalHelper;
 use App\Models\BaseModel;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
 use DateTime;
+use Psr\Log\LoggerInterface;
+use SleekDB\Store;
 
 class DBController extends BaseController
 {
+    private $query;
+    private $body;
+
+    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    {
+        parent::initController($request, $response, $logger);
+
+        $this->query = $this->request->getGet();
+        $this->body = $this->request->getJSON(true);
+    }
+
     public function index()
     {
         return ('hello world');
     }
 
-    public function insert($documentName)
+    public function insert(string $documentName)
     {
         $model = new BaseModel($documentName);
-        $store = $model->getStore();
 
-        $query = $this->request->getGet();
-        $data = json_decode($this->request->getBody(), true);
-
-        $data['_meta'] = [
-            'created_at' => date(DateTime::ISO8601),
-            'updated_at' => date(DateTime::ISO8601),
-            'deleted_at' => NULL,
-        ];
-
-        if (!empty($query['unique'])) {
-            $found = $store->findOneBy([$query['unique'], '=', $data[$query['unique']]]);
-
-            if (!empty($found)) {
-                $this->response->setStatusCode(400);
-                return $this->response->setJSON([
-                    'message' => "Duplicate data, key: {$query['unique']}, value: {$data[$query['unique']]}",
-                    'data' => false,
-                ]);
-            }
-        }
-
-        $success = $store->insert($data);
-        return $this->response->setJSON([
-            'data' => $success
-        ]);
-    }
-
-    public function insertMany($documentName)
-    {
-        $model = new BaseModel($documentName);
-        $store = $model->getStore();
-
-        $data = json_decode($this->request->getBody(), true);
-        $query = $this->request->getGet();
-
-        $newData = [];
-
-        foreach ($data as $key => $value) {
-            if (!empty($query['unique'])) {
-                $found = $store->findOneBy([$query['unique'], '=', $value[$query['unique']]]);
-
-                if (empty($found)) {
-                    $value['_meta'] = [
-                        'created_at' => date(DateTime::ISO8601),
-                        'updated_at' => date(DateTime::ISO8601),
-                        'deleted_at' => NULL,
-                    ];
-
-                    $newData[] = $value;
-                }
-            }
-        }
-
-        if (empty($newData)) {
+        // Non unique insert
+        if (empty($this->query['unique'])) {
+            $success = $model->insert($this->body);
             return $this->response->setJSON([
-                'data' => false
+                'data' => $success
             ]);
         }
 
-        $success = $store->insertMany($newData);
+        // Unique insert
+        $success = $model->insertUnique($this->body, $this->query['unique']);
+
+        if (empty($success)) {
+            $this->response->setStatusCode(400);
+            return $this->response->setJSON([
+                'message' => "Duplicate data, key: {$this->query['unique']}, value: {$this->body[$this->query['unique']]}",
+                'data' => false,
+            ]);
+        }
+
         return $this->response->setJSON([
             'data' => $success
         ]);
     }
 
-    public function findBy($documentName)
+    public function insertMany(string $documentName)
+    {
+        $model = new BaseModel($documentName);
+
+        $data = $this->body;
+
+        if (empty($this->query['unique'])) {
+            $success = $model->insertMany($data);
+        } else {
+            $success = $model->insertManyUnique($data, $this->query['unique']);
+        }
+
+        return $this->response->setJSON([
+            'data' => $success,
+            'length' => count($success),
+        ]);
+    }
+
+    public function findBy(string $documentName)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
 
-        $body = json_decode($this->request->getBody(), true);
-        $query = $this->request->getGet();
+        $body = $this->body;
+        $query = $this->query;
+
+        $pagination = $query['pagination'] ?? 0;
 
         $body['criteria'][] = [
             '_meta.deleted_at', '=', NULL
@@ -108,14 +101,14 @@ class DBController extends BaseController
 
         return $this->response->setJSON([
             'data' => $data,
-            'pagination' => $this->getPagination($documentName, $param),
+            'pagination' => $pagination == 1 ? $model->getPagination($documentName, $param) : [],
             'debug' => [
                 'param' => $param
             ],
         ]);
     }
 
-    public function updateById($documentName)
+    public function updateById(string $documentName)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
@@ -131,7 +124,7 @@ class DBController extends BaseController
         ]);
     }
 
-    public function delete($documentName, $id)
+    public function delete(string $documentName, $id)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
@@ -147,24 +140,5 @@ class DBController extends BaseController
         return $this->response->setJSON([
             'data' => $res,
         ]);
-    }
-
-    private function getPagination($documentName, $param)
-    {
-        if ($param['limit'] < 1) {
-            return [];
-        }
-
-        $model = new BaseModel($documentName);
-        $store = $model->getStore();
-
-        $data = $store->findBy($param['criteria'], $param['order']);
-
-        return [
-            'page' => (int) $param['page'],
-            'per_page' => (int) $param['limit'],
-            'total_data' => count($data),
-            'total_page' => ceil(count($data) / $param['limit']),
-        ];
     }
 }
