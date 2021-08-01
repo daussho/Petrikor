@@ -33,9 +33,18 @@ class DBController extends BaseController
     {
         $model = new BaseModel($documentName);
 
-        $success = $model->insert($this->body, $this->query['unique'] ?? '');
+        // Non unique insert
+        if (empty($this->query['unique'])) {
+            $success = $model->insert($this->body);
+            return $this->response->setJSON([
+                'data' => $success
+            ]);
+        }
 
-        if (!$success) {
+        // Unique insert
+        $success = $model->insertUnique($this->body, $this->query['unique']);
+
+        if (empty($success)) {
             $this->response->setStatusCode(400);
             return $this->response->setJSON([
                 'message' => "Duplicate data, key: {$this->query['unique']}, value: {$this->body[$this->query['unique']]}",
@@ -53,7 +62,7 @@ class DBController extends BaseController
         $model = new BaseModel($documentName);
         $store = $model->getStore();
 
-        $data = json_decode($this->request->getBody(), true);
+        $data = $this->body;
 
         if (!empty($this->query['unique'])) {
             $success = $this->_insertManyUnique($store, $this->query['unique']);
