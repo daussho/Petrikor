@@ -49,4 +49,20 @@ class BaseModel
             'deleted_at' => NULL,
         ];
     }
+
+    public function getPagination(string $documentName, $param)
+    {
+        if ($param['limit'] < 1) {
+            return [];
+        }
+
+        $data = $this->store->findBy($param['criteria'], $param['order']);
+
+        return [
+            'page' => (int) $param['page'],
+            'per_page' => (int) $param['limit'],
+            'total_data' => count($data),
+            'total_page' => ceil(count($data) / $param['limit']),
+        ];
+    }
 }

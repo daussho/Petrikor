@@ -29,7 +29,7 @@ class DBController extends BaseController
         return ('hello world');
     }
 
-    public function insert($documentName)
+    public function insert(string $documentName)
     {
         $model = new BaseModel($documentName);
 
@@ -48,7 +48,7 @@ class DBController extends BaseController
         ]);
     }
 
-    public function insertMany($documentName)
+    public function insertMany(string $documentName)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
@@ -100,13 +100,15 @@ class DBController extends BaseController
         return $respose;
     }
 
-    public function findBy($documentName)
+    public function findBy(string $documentName)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
 
-        $body = json_decode($this->request->getBody(), true);
-        $query = $this->request->getGet();
+        $body = $this->body;
+        $query = $this->query;
+
+        $pagination = $query['pagination'] ?? 0;
 
         $body['criteria'][] = [
             '_meta.deleted_at', '=', NULL
@@ -124,14 +126,14 @@ class DBController extends BaseController
 
         return $this->response->setJSON([
             'data' => $data,
-            'pagination' => $this->getPagination($documentName, $param),
+            'pagination' => $pagination == 1 ? $model->getPagination($documentName, $param) : [],
             'debug' => [
                 'param' => $param
             ],
         ]);
     }
 
-    public function updateById($documentName)
+    public function updateById(string $documentName)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
@@ -147,7 +149,7 @@ class DBController extends BaseController
         ]);
     }
 
-    public function delete($documentName, $id)
+    public function delete(string $documentName, $id)
     {
         $model = new BaseModel($documentName);
         $store = $model->getStore();
@@ -163,24 +165,5 @@ class DBController extends BaseController
         return $this->response->setJSON([
             'data' => $res,
         ]);
-    }
-
-    private function getPagination($documentName, $param)
-    {
-        if ($param['limit'] < 1) {
-            return [];
-        }
-
-        $model = new BaseModel($documentName);
-        $store = $model->getStore();
-
-        $data = $store->findBy($param['criteria'], $param['order']);
-
-        return [
-            'page' => (int) $param['page'],
-            'per_page' => (int) $param['limit'],
-            'total_data' => count($data),
-            'total_page' => ceil(count($data) / $param['limit']),
-        ];
     }
 }
