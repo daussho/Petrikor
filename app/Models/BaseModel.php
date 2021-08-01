@@ -35,20 +35,41 @@ class BaseModel
 
     public function insertUnique($data, $unique)
     {
-        $data['_meta'] = $this->__createTimeStamp();
-
         $found = $this->store->findOneBy([$unique, '=', $data[$unique]]);
 
         if (!empty($found)) {
             return [];
         }
 
-        return $this->store->insert($data);
+        return $this->insert($data);
     }
 
-    public function insertMany($data)
+    public function insertMany(array $data)
     {
-        # code...
+        foreach ($data as $key => $value) {
+            $data[$key]['_meta'] = $this->__createTimeStamp();
+        }
+
+        return $this->store->insertMany($data);
+    }
+
+    public function insertManyUnique($data, $unique)
+    {
+        $newData = [];
+
+        foreach ($data as $key => $value) {
+            $found = $this->store->findOneBy([$unique, '=', $value[$unique]]);
+
+            if (empty($found)) {
+                $newData[] = $data;
+            }
+        }
+
+        if (empty($newData)) {
+            return [];
+        }
+
+        return $this->insertMany($newData);
     }
 
     private function __createTimeStamp()

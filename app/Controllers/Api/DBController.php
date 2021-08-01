@@ -60,53 +60,19 @@ class DBController extends BaseController
     public function insertMany(string $documentName)
     {
         $model = new BaseModel($documentName);
-        $store = $model->getStore();
 
         $data = $this->body;
 
-        if (!empty($this->query['unique'])) {
-            $success = $this->_insertManyUnique($store, $this->query['unique']);
-
-            return $this->response->setJSON([
-                'data' => $success,
-                'legnth' => count($success),
-            ]);
+        if (empty($this->query['unique'])) {
+            $success = $model->insertMany($data);
+        } else {
+            $success = $model->insertManyUnique($data, $this->query['unique']);
         }
 
-        foreach ($data as $key => $value) {
-            $data[$key]['_meta'] = [
-                'created_at' => date(DateTime::ISO8601),
-                'updated_at' => date(DateTime::ISO8601),
-                'deleted_at' => NULL,
-            ];
-        }
-
-        $success = $store->insertMany($data);
         return $this->response->setJSON([
             'data' => $success,
-            'legnth' => count($success),
+            'length' => count($success),
         ]);
-    }
-
-    private function _insertManyUnique(Store $store, string $unique)
-    {
-        $respose = [];
-
-        foreach ($this->body as $key => $value) {
-            $found = $store->findOneBy([$unique, '=', $value[$unique]]);
-
-            if (empty($found)) {
-                $value['_meta'] = [
-                    'created_at' => date(DateTime::ISO8601),
-                    'updated_at' => date(DateTime::ISO8601),
-                    'deleted_at' => NULL,
-                ];
-
-                $respose[] = $store->insert($value);
-            }
-        }
-
-        return $respose;
     }
 
     public function findBy(string $documentName)
