@@ -61,7 +61,7 @@ class BaseModel
             $found = $this->store->findOneBy([$unique, '=', $value[$unique]]);
 
             if (empty($found)) {
-                $newData[] = $data;
+                $newData[] = $value;
             }
         }
 
