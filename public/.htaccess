@@ -36,6 +36,11 @@ Options All -Indexes
 	# Ensure Authorization header is passed along
 	RewriteCond %{HTTP:Authorization} .
 	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+	
+	#Set headers to access CORS Requests / allowing localhost only
+    Header always add Access-Control-Allow-Origin "*"
+    Header always add Access-Control-Allow-Headers "origin, x-requested-with, content-type"
+    Header always add Access-Control-Allow-Methods "PUT, GET, POST, DELETE, OPTIONS"
 </IfModule>
 
 <IfModule !mod_rewrite.c>

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Helpers\GlobalHelper;
 use DateTime;
 use SleekDB\Query;
 use SleekDB\Store;
@@ -57,14 +58,25 @@ class BaseModel
     {
         $newData = [];
 
+        $uniqueFilter = [];
         foreach ($data as $key => $value) {
-            $found = $this->store->findOneBy([$unique, '=', $value[$unique]]);
-
-            if (empty($found)) {
-                $newData[] = $data;
-            }
+            $uniqueFilter[] = $value[$unique];
         }
 
+        $foundData = $this->store->findBy([$unique, 'IN', $uniqueFilter]);
+
+        foreach ($data as $key => $value) {
+            $found = false;
+            foreach ($foundData as $k => $v) {
+                if ($v[$unique] == $value[$unique]) {
+                    $found = true;
+                }
+            }
+
+            if (!$found) {
+                $newData[] = $value;
+            }
+        }
         if (empty($newData)) {
             return [];
         }

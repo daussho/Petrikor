@@ -40,11 +40,11 @@ $routes->options('(:any)', function () {
 });
 
 $routes->group('db', function ($routes) {
-    $routes->post('insert/(:alphanum)', 'Api\DBController::insert/$1');
-    $routes->post('insert-many/(:alphanum)', 'Api\DBController::insertMany/$1');
-    $routes->post('find-by/(:alphanum)', 'Api\DBController::findBy/$1');
-    $routes->patch('update-by-id/(:alphanum)', 'Api\DBController::updateById/$1');
-    $routes->delete('delete/(:alphanum)/(:num)', 'Api\DBController::delete/$1/$2');
+    $routes->post('insert/(:segment)', 'Api\DBController::insert/$1');
+    $routes->post('insert-many/(:segment)', 'Api\DBController::insertMany/$1');
+    $routes->post('find-by/(:segment)', 'Api\DBController::findBy/$1');
+    $routes->patch('update-by-id/(:segment)', 'Api\DBController::updateById/$1');
+    $routes->delete('delete/(:segment)/(:num)', 'Api\DBController::delete/$1/$2');
 });
 
 /*
