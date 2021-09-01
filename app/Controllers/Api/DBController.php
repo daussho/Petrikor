@@ -121,6 +121,9 @@ class DBController extends BaseController
 
         return $this->response->setJSON([
             'data' => $data,
+            'debug' => [
+                'body' => $body
+            ],
         ]);
     }
 
