@@ -115,7 +115,7 @@ class DBController extends BaseController
 
         $body = json_decode($this->request->getBody(), true);
 
-        // $body['data']['_meta.updated_at'] = date(DateTime::ISO8601);
+        $body['data']['_meta.updated_at'] = date(DateTime::ISO8601);
 
         $data = $store->updateById((int) $body['id'], $body['data']);
 
