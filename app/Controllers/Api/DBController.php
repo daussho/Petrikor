@@ -120,10 +120,7 @@ class DBController extends BaseController
         $data = $store->updateById((int) $body['id'], $body['data']);
 
         return $this->response->setJSON([
-            'data' => $data,
-            'debug' => [
-                'body' => $body
-            ],
+            'data' => $data
         ]);
     }
 
