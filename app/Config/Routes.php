@@ -43,7 +43,7 @@ $routes->group('db', function ($routes) {
     $routes->post('insert/(:segment)', 'Api\DBController::insert/$1');
     $routes->post('insert-many/(:segment)', 'Api\DBController::insertMany/$1');
     $routes->post('find-by/(:segment)', 'Api\DBController::findBy/$1');
-    $routes->patch('update-by-id/(:segment)', 'Api\DBController::updateById/$1');
+    $routes->put('update-by-id/(:segment)', 'Api\DBController::updateById/$1');
     $routes->delete('delete/(:segment)/(:num)', 'Api\DBController::delete/$1/$2');
 });
 
